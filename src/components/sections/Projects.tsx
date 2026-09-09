@@ -1,73 +1,56 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Container, Section } from "@/components/ui/Section";
-import { SectionHeading } from "@/components/ui/Heading";
+import { Eyebrow } from "@/components/ui/Heading";
 import { Reveal } from "@/components/ui/Reveal";
-import { Icon } from "@/components/ui/Icon";
-import { ButtonLink } from "@/components/ui/Button";
 import { QuoteButton } from "@/components/ui/QuoteButton";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
-import { ProjectCard } from "@/components/projects/ProjectCard";
-import { PROJECTS, availableFilters, type Project, type ProjectCategory } from "@/data/projects";
-import { track } from "@/lib/analytics";
+import { ProjectShowcase } from "@/components/projects/ProjectShowcase";
+import { ORDERED_PROJECTS, availableFilters, type ProjectCategory } from "@/data/projects";
 import { cn } from "@/lib/utils";
 
 type Filter = "All" | ProjectCategory;
 
-/** Featured projects break the grid; the rest fill a two-column layout. */
-function layout(projects: Project[]) {
-  const blocks: ({ kind: "featured"; project: Project } | { kind: "grid"; projects: Project[] })[] = [];
-  let bucket: Project[] = [];
-
-  for (const project of projects) {
-    if (project.featured) {
-      if (bucket.length) {
-        blocks.push({ kind: "grid", projects: bucket });
-        bucket = [];
-      }
-      blocks.push({ kind: "featured", project });
-    } else {
-      bucket.push(project);
-    }
-  }
-  if (bucket.length) blocks.push({ kind: "grid", projects: bucket });
-  return blocks;
-}
-
+/**
+ * The portfolio.
+ *
+ * Every project is a full-width editorial block rather than a card, and the
+ * order is the studio's own — strongest technical and business work first.
+ * Nothing here is project-specific: the list comes from `data/projects.ts`.
+ */
 export function Projects() {
   const [filter, setFilter] = useState<Filter>("All");
   const reduce = useReducedMotion();
   const filters = availableFilters();
 
   const visible = useMemo(
-    () => (filter === "All" ? PROJECTS : PROJECTS.filter((p) => p.category === filter)),
+    () =>
+      filter === "All"
+        ? ORDERED_PROJECTS
+        : ORDERED_PROJECTS.filter((project) => project.category === filter),
     [filter],
   );
 
-  const blocks = useMemo(() => layout(visible), [visible]);
-  const hasProjects = PROJECTS.length > 0;
-
   return (
-    <Section tone="light" id="work" aria-labelledby="work-title">
+    <Section tone="light" id="work" aria-labelledby="work-title" spacing="lg">
       <Container>
-        <SectionHeading
-          id="work-title"
-          eyebrow="Selected work"
-          title="Built. Shipped. Results."
-          intro="Real products, live on the internet. Each one designed, developed and optimized end to end."
-          action={
-            hasProjects ? (
-              <ButtonLink href="/work" variant="outline" size="md" arrow>
-                All projects
-              </ButtonLink>
-            ) : null
-          }
-        />
+        <div className="max-w-4xl">
+          <Eyebrow className="mb-6">Selected work</Eyebrow>
+          <h2 id="work-title" className="display-2 text-ink uppercase">
+            We don’t just show mockups.
+            <br />
+            <span className="text-navy">We show what we actually built.</span>
+          </h2>
+          <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-ink/65 sm:text-lg">
+            From e-commerce platforms and business websites to research products and custom
+            applications, these are real products running in production. Every preview below is a
+            screen recording of the live site.
+          </p>
+        </div>
 
-        {/* Filters — only worth showing once there is enough work to filter */}
-        {hasProjects && filters.length > 2 ? (
+        {filters.length > 2 ? (
           <Reveal className="mt-10">
             <div
               role="tablist"
@@ -79,6 +62,7 @@ export function Projects() {
                 return (
                   <button
                     key={option}
+                    type="button"
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setFilter(option)}
@@ -91,7 +75,7 @@ export function Projects() {
                       <motion.span
                         layoutId="project-filter"
                         className="absolute inset-0 rounded-full bg-navy"
-                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                       />
                     ) : (
                       <span className="absolute inset-0 rounded-full border border-line" />
@@ -104,145 +88,66 @@ export function Projects() {
           </Reveal>
         ) : null}
 
-        {hasProjects ? (
-          <div className="mt-10 space-y-6 sm:mt-12 sm:space-y-8">
-            <AnimatePresence mode="popLayout" initial={false}>
-              {blocks.map((block, index) =>
-                block.kind === "featured" ? (
-                  <motion.div
-                    key={`featured-${block.project.slug}`}
-                    layout={!reduce}
-                    initial={reduce ? false : { opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={reduce ? undefined : { opacity: 0, y: -12 }}
-                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                    onViewportEnter={() =>
-                      track("project_viewed", { project: block.project.slug })
-                    }
-                  >
-                    <ProjectCard project={block.project} featured priority={index === 0} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={`grid-${index}`}
-                    layout={!reduce}
-                    className="grid gap-6 md:grid-cols-2"
-                    initial={reduce ? false : { opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={reduce ? undefined : { opacity: 0, y: -12 }}
-                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    {block.projects.map((project) => (
-                      <ProjectCard key={project.slug} project={project} />
-                    ))}
-                  </motion.div>
-                ),
-              )}
-            </AnimatePresence>
+        <div className="mt-16 space-y-20 sm:mt-20 sm:space-y-28 lg:space-y-36">
+          {visible.map((project, index) => (
+            <ProjectShowcase
+              // Keying on the filter forces a clean remount, so the stage
+              // registry never holds an entry for a project that left the page.
+              key={`${filter}-${project.slug}`}
+              project={project}
+              index={index}
+            />
+          ))}
+        </div>
 
-            {visible.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-line py-14 text-center text-[15px] text-ink/45">
-                No projects in this category yet.
-              </p>
-            ) : null}
-          </div>
-        ) : (
-          <ProjectsPlaceholder />
-        )}
+        {visible.length === 0 ? (
+          <p className="mt-14 rounded-2xl border border-dashed border-line py-16 text-center text-[15px] text-ink/45">
+            No projects in this category yet.
+          </p>
+        ) : null}
 
         {/* Conversion step after the work */}
-        <Reveal className="mt-12" delay={0.05}>
-          <div className="flex flex-col items-start gap-5 rounded-2xl bg-navy p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
-            <div>
-              <p className="font-display text-lg font-bold sm:text-xl">
-                Want something like this for your business?
-              </p>
-              <p className="mt-1.5 text-[14px] text-white/60">
-                Tell us the goal. We’ll scope the build and send you a quote.
-              </p>
+        <Reveal className="mt-24 sm:mt-32">
+          <div className="relative overflow-hidden rounded-2xl bg-navy p-8 text-white sm:p-12 lg:p-16">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_80%_at_85%_0%,rgba(255,208,20,0.16)_0%,transparent_60%)]"
+              aria-hidden="true"
+            />
+            <div className="grid-lines pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+
+            <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl">
+                <h3
+                  className={cn(
+                    "font-display text-[clamp(1.7rem,1.1rem+2vw,2.75rem)] leading-[1.05] font-extrabold tracking-[-0.035em] uppercase",
+                    reduce ? undefined : "text-balance-tight",
+                  )}
+                >
+                  Your project could be <span className="text-gold">next.</span>
+                </h3>
+                <p className="mt-5 text-[15px] leading-relaxed text-white/65 sm:text-base">
+                  Have an idea, business or digital product that needs to be built properly? Tell us
+                  the goal and we’ll scope the build.
+                </p>
+              </div>
+
+              <div className="flex w-full shrink-0 flex-col gap-3 sm:flex-row lg:w-auto">
+                <QuoteButton source="projects-cta" variant="gold" size="lg" arrow>
+                  Start a Project
+                </QuoteButton>
+                <WhatsAppButton
+                  source="projects-cta"
+                  variant="outline-light"
+                  size="lg"
+                  message="Hello DSmart Web Studio, I'd like a quote for a project."
+                >
+                  Request a Quote
+                </WhatsAppButton>
+              </div>
             </div>
-            <QuoteButton
-              source="projects-cta"
-              variant="gold"
-              size="lg"
-              arrow
-              className="w-full shrink-0 sm:w-auto"
-            >
-              Build Something Like This
-            </QuoteButton>
           </div>
         </Reveal>
       </Container>
     </Section>
-  );
-}
-
-/**
- * Shown while the public case-study library is being prepared. It sets
- * expectations honestly instead of filling the section with invented work.
- */
-function ProjectsPlaceholder() {
-  const anatomy = [
-    { label: "The challenge", detail: "What the business needed to solve." },
-    { label: "The build", detail: "Design decisions, architecture and features." },
-    { label: "The stack", detail: "Every technology used in the product." },
-    { label: "After launch", detail: "SEO, performance and what we optimized." },
-  ];
-
-  return (
-    <Reveal className="mt-12">
-      <div className="overflow-hidden rounded-2xl border border-line bg-mist">
-        <div className="grid lg:grid-cols-2">
-          <div className="p-7 sm:p-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-navy/12 bg-white px-3 py-1.5 text-[11px] font-bold tracking-[0.12em] text-navy uppercase">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />
-              Case studies in production
-            </span>
-
-            <h3 className="mt-6 font-display text-2xl leading-tight font-extrabold text-ink sm:text-3xl">
-              Our case studies are being published here.
-            </h3>
-            <p className="mt-4 text-[15px] leading-relaxed text-ink/60">
-              We publish a project only once we can show the real product and describe what it does
-              accurately. In the meantime, we’ll walk you through live builds directly.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <WhatsAppButton
-                source="projects-empty"
-                size="lg"
-                message="Hello DSmart Web Studio, I'd like to see examples of your work."
-              >
-                See our work on WhatsApp
-              </WhatsAppButton>
-              <QuoteButton source="projects-empty" variant="outline" size="lg" arrow>
-                Start a Project
-              </QuoteButton>
-            </div>
-          </div>
-
-          <div className="border-t border-line bg-white p-7 sm:p-10 lg:border-t-0 lg:border-l">
-            <p className="text-[11px] font-bold tracking-[0.18em] text-ink/40 uppercase">
-              What a DSmart case study covers
-            </p>
-            <ul className="mt-6 space-y-5">
-              {anatomy.map((item, index) => (
-                <li key={item.label} className="flex gap-4">
-                  <span className="font-mono text-[11px] text-navy/45">0{index + 1}</span>
-                  <div>
-                    <p className="text-[14.5px] font-semibold text-ink">{item.label}</p>
-                    <p className="mt-0.5 text-[13px] text-ink/50">{item.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 flex items-center gap-2 border-t border-line pt-5 text-[12.5px] text-ink/45">
-              <Icon name="shield" size={14} className="text-navy" />
-              No stock mockups. No invented results.
-            </div>
-          </div>
-        </div>
-      </div>
-    </Reveal>
   );
 }
