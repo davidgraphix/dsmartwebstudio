@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Media originals kept by scripts/optimize-project-media.mjs
+public/projects/**/*.original.mp4

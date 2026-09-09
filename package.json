@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "media:report": "node scripts/optimize-project-media.mjs",
+    "media:optimize": "node scripts/optimize-project-media.mjs --write"
   },
   "dependencies": {
     "framer-motion": "^13.2.0",
