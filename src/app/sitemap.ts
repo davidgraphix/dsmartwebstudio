@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/data/site";
-import { PROJECTS } from "@/data/projects";
+import { ORDERED_PROJECTS } from "@/data/projects";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -12,7 +12,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const projectRoutes: MetadataRoute.Sitemap = PROJECTS.map((project) => ({
+  const projectRoutes: MetadataRoute.Sitemap = ORDERED_PROJECTS.filter(
+    (project) => project.caseStudy,
+  ).map((project) => ({
     url: `${SITE.url}/work/${project.slug}`,
     lastModified: now,
     changeFrequency: "monthly",
