@@ -41,5 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Media originals kept by scripts/optimize-project-media.mjs
-public/projects/**/*.original.mp4
+# Pre-optimization recordings kept by scripts/optimize-project-media.mjs.
+# Held outside public/ so they are never served or deployed.
+/media-originals/

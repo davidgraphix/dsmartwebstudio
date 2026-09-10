@@ -16,14 +16,24 @@
  *   node scripts/optimize-project-media.mjs           # report only
  *   node scripts/optimize-project-media.mjs --write   # re-encode in place
  *
- * Originals are kept alongside as `<name>.original.mp4` so nothing is lost.
+ * Originals move to /media-originals/<project>/<name>.original.mp4, so nothing
+ * is lost and nothing oversized is left inside /public to be deployed.
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync, renameSync, existsSync } from "node:fs";
+import {
+  readdirSync,
+  readFileSync,
+  statSync,
+  renameSync,
+  existsSync,
+  mkdirSync,
+} from "node:fs";
 import path from "node:path";
 
 const ROOT = path.join(process.cwd(), "public", "projects");
+/** Pre-optimization copies live outside public/ so they are never deployed. */
+const ARCHIVE = path.join(process.cwd(), "media-originals");
 const WRITE = process.argv.includes("--write");
 
 /** Desktop recordings are presented ~700px wide; 1280 leaves room for retina. */
@@ -72,14 +82,15 @@ function orphans() {
   return found;
 }
 
-function encode({ full, file }) {
-  const original = full.replace(/\.mp4$/, ".original.mp4");
+function encode({ dir, full, file }) {
+  const original = path.join(ARCHIVE, dir, file.replace(/\.mp4$/, ".original.mp4"));
   if (existsSync(original)) {
     console.log(`  skipped ${file} — already optimized`);
     return null;
   }
 
   const before = statSync(full).size;
+  mkdirSync(path.dirname(original), { recursive: true });
   renameSync(full, original);
 
   execFileSync(
@@ -180,7 +191,7 @@ function main() {
 
   if (before) {
     console.log(`\nTotal ${mb(before)} -> ${mb(after)}`);
-    console.log("Originals kept as *.original.mp4 — delete them once you are happy.");
+    console.log("Originals moved to /media-originals — delete that folder once you are happy.");
   }
 }
 

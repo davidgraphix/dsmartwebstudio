@@ -112,8 +112,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/printpalash/printpalash-vid.mp4",
         poster: "/projects/printpalash/desktop.webp",
-        width: 1898,
-        height: 928,
+        width: 1280,
+        height: 626,
       },
       mobile: {
         src: "/projects/printpalash/printpalash-mobile.mp4",
@@ -159,8 +159,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/summy-solutions/summy.mp4",
         poster: "/projects/summy-solutions/desktop.webp",
-        width: 1846,
-        height: 926,
+        width: 1280,
+        height: 642,
       },
       mobile: {
         src: "/projects/summy-solutions/summy-mobile.mp4",
@@ -208,8 +208,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/blackcircle/blackcircle.mp4",
         poster: "/projects/blackcircle/desktop.webp",
-        width: 1896,
-        height: 928,
+        width: 1280,
+        height: 626,
       },
       mobile: {
         src: "/projects/blackcircle/blackcircle-mobile.mp4",
@@ -260,8 +260,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/globalease/globalease.mp4",
         poster: "/projects/globalease/desktop.webp",
-        width: 1918,
-        height: 928,
+        width: 1280,
+        height: 620,
       },
       mobile: {
         src: "/projects/globalease/globalease-mobile.mp4",
@@ -309,8 +309,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/rise-clear/riseclear.mp4",
         poster: "/projects/rise-clear/desktop.webp",
-        width: 1822,
-        height: 930,
+        width: 1280,
+        height: 654,
       },
       mobile: {
         src: "/projects/rise-clear/riseclear-mobile.mp4",
@@ -355,8 +355,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/genzhr/genzhr.mp4",
         poster: "/projects/genzhr/desktop.webp",
-        width: 1920,
-        height: 926,
+        width: 1280,
+        height: 618,
       },
       mobile: {
         src: "/projects/genzhr/genzhr-mbile.mp4",
@@ -405,8 +405,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/wonderfilms/wonderfilms.mp4",
         poster: "/projects/wonderfilms/desktop.webp",
-        width: 1920,
-        height: 932,
+        width: 1280,
+        height: 622,
       },
       mobile: {
         src: "/projects/wonderfilms/wonderfilms-mobile.mp4",
@@ -454,8 +454,8 @@ export const PROJECTS: Project[] = [
       desktop: {
         src: "/projects/damzypictures/damzypictures.mp4",
         poster: "/projects/damzypictures/desktop.webp",
-        width: 1864,
-        height: 932,
+        width: 1280,
+        height: 640,
       },
       mobile: {
         src: "/projects/damzypictures/damzypictures-mobile.mp4",
