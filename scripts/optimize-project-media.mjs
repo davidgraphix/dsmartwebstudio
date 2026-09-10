@@ -20,7 +20,7 @@
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { readdirSync, statSync, renameSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, renameSync, existsSync } from "node:fs";
 import path from "node:path";
 
 const ROOT = path.join(process.cwd(), "public", "projects");
@@ -40,14 +40,33 @@ function mb(bytes) {
   return (bytes / 1048576).toFixed(1) + " MB";
 }
 
+/**
+ * The list comes from `data/projects.ts` rather than from a directory walk, so
+ * the script can only ever touch media a project actually references. Media
+ * left behind by a removed project is reported separately and never rewritten.
+ */
 function videos() {
+  const source = readFileSync(path.join(process.cwd(), "src", "data", "projects.ts"), "utf8");
+  const referenced = [...source.matchAll(/src: "(\/projects\/[^"]+\.mp4)"/g)].map((m) => m[1]);
+
+  return referenced.map((webPath) => {
+    const full = path.join(process.cwd(), "public", webPath);
+    if (!existsSync(full)) throw new Error(`projects.ts references a missing file: ${webPath}`);
+    return { dir: path.basename(path.dirname(full)), file: path.basename(full), full };
+  });
+}
+
+/** .mp4 files under /public/projects that no project references any more. */
+function orphans() {
+  const used = new Set(videos().map((item) => item.full));
   const found = [];
   for (const dir of readdirSync(ROOT)) {
     const dirPath = path.join(ROOT, dir);
     if (!statSync(dirPath).isDirectory()) continue;
     for (const file of readdirSync(dirPath)) {
       if (!file.endsWith(".mp4") || file.endsWith(".original.mp4")) continue;
-      found.push({ dir, file, full: path.join(dirPath, file) });
+      const full = path.join(dirPath, file);
+      if (!used.has(full)) found.push({ dir, file, full });
     }
   }
   return found;
@@ -116,13 +135,26 @@ function main() {
 
   if (!WRITE) {
     let total = 0;
-    console.log("Project recordings:\n");
+    console.log(`Referenced recordings (${list.length}):\n`);
     for (const item of list) {
       const size = statSync(item.full).size;
       total += size;
       console.log(`  ${item.dir}/${item.file}`.padEnd(56) + mb(size));
     }
     console.log(`\n  total`.padEnd(58) + mb(total));
+
+    const unused = orphans();
+    if (unused.length) {
+      let dead = 0;
+      console.log("\nUnreferenced media still in /public (shipped but never shown):\n");
+      for (const item of unused) {
+        const size = statSync(item.full).size;
+        dead += size;
+        console.log(`  ${item.dir}/${item.file}`.padEnd(56) + mb(size));
+      }
+      console.log(`\n  total`.padEnd(58) + mb(dead));
+    }
+
     console.log("\nRun with --write to re-encode (requires ffmpeg).");
     return;
   }
