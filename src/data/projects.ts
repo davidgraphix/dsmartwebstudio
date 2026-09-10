@@ -70,8 +70,6 @@ export type Project = {
   featured?: boolean;
   client?: string;
   industry?: string;
-  /** Honest framing for work that is not a client engagement. */
-  disclosure?: string;
 };
 
 export const PROJECTS: Project[] = [
@@ -464,53 +462,6 @@ export const PROJECTS: Project[] = [
         poster: "/projects/damzypictures/mobile.webp",
         width: 278,
         height: 596,
-      },
-    },
-  },
-  {
-    slug: "quickcart",
-    order: 9,
-    name: "QuickCart",
-    category: "E-commerce",
-    discipline: "E-commerce Web Application",
-    title: "Storefront & Seller Dashboard Build",
-    summary:
-      "A full-stack e-commerce application covering the complete path from storefront browsing to an authenticated seller dashboard.",
-    description:
-      "QuickCart is an e-commerce web application built end to end: a product storefront with featured and popular collections, product detail pages, a cart and order flow, authenticated accounts through Clerk, and a separate seller dashboard for managing products and orders.",
-    challenge:
-      "An e-commerce application has two entirely different user surfaces — the shopper and the seller — sharing one product and order model. Keeping both coherent was the point of the build.",
-    solution:
-      "We implemented the storefront and the seller dashboard against a shared catalogue and order model, with Clerk handling authentication and the route boundary between customer and seller areas.",
-    designNotes:
-      "A conventional, familiar commerce layout was the right call here — the interest is in the application behaviour, not in reinventing product-grid conventions.",
-    responsiveNotes: "Storefront and dashboard layouts both adapt from desktop grids to phone-width stacks.",
-    features: [
-      "Product storefront with featured and popular collections",
-      "Product detail pages",
-      "Shopping cart and order flow",
-      "Authentication via Clerk",
-      "Seller dashboard for products and orders",
-      "Promotional banner system",
-      "Newsletter signup",
-    ],
-    technologies: ["Next.js", "React", "Tailwind CSS", "Clerk"],
-    liveUrl: "https://e-commerse-chi.vercel.app/",
-    disclosure:
-      "A build project rather than a client engagement. The deployed demo still carries template branding and placeholder copy in places.",
-    caseStudy: true,
-    media: {
-      desktop: {
-        src: "/projects/e-commerse/e-commerse.mp4",
-        poster: "/projects/e-commerse/desktop.webp",
-        width: 1920,
-        height: 932,
-      },
-      mobile: {
-        src: "/projects/e-commerse/e-commerse-mobile.mp4",
-        poster: "/projects/e-commerse/mobile.webp",
-        width: 274,
-        height: 594,
       },
     },
   },

@@ -188,14 +188,6 @@ export default async function ProjectPage({ params }: PageProps) {
                 </Reveal>
               ) : null}
 
-              {project.disclosure ? (
-                <Reveal>
-                  <p className="rounded-xl border border-line bg-mist p-4 text-[13.5px] leading-relaxed text-ink/55">
-                    <span className="font-semibold text-ink/70">Note. </span>
-                    {project.disclosure}
-                  </p>
-                </Reveal>
-              ) : null}
             </div>
 
             {/* Meta rail */}

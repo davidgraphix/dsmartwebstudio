@@ -116,12 +116,6 @@ export function ProjectShowcase({
             </motion.div>
           ) : null}
 
-          {project.disclosure ? (
-            <p className="mt-5 max-w-lg border-l-2 border-line pl-3 text-[12.5px] leading-relaxed text-ink/40">
-              {project.disclosure}
-            </p>
-          ) : null}
-
           <motion.div
             {...copyMotion}
             transition={step(0.2)}
