@@ -25,7 +25,7 @@ export function HeroShowcase() {
         };
 
   return (
-    <div className="relative mx-auto w-full max-w-[560px] lg:max-w-none">
+    <div className="relative mx-auto w-fulllg:pt-10 lg:pt-10 max-w-[560px] lg:max-w-none">
       {/* Glow */}
       <div
         className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-navy/45 blur-[80px]"
@@ -55,7 +55,7 @@ export function HeroShowcase() {
         {...enter(0.5)}
         className="absolute -top-6 -right-2 w-[152px] sm:-top-8 sm:-right-5 sm:w-[188px] lg:-right-8"
       >
-        <div className="motion-safe:animate-float-mid">
+        <div className="motion-safe:animate-float-mid lg:pt-20">
           <FloatCard>
             <div className="flex min-w-0 items-center gap-2">
               <Icon name="google" size={14} className="shrink-0 text-white/80" />

@@ -27,7 +27,7 @@ export function Hero() {
         };
 
   return (
-    <section className="relative isolate overflow-hidden bg-ink pt-28 pb-20 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
+    <section className="relative isolate overflow-hidden bg-ink pt-28 pb-20 sm:pt-32 sm:pb-24 lg:pt-20 lg:pb-32">
       {/* Backdrop */}
       <div className="pointer-events-none absolute inset-0 -z-20" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(120%_85%_at_15%_-10%,#02167F_0%,transparent_58%),radial-gradient(90%_70%_at_92%_8%,rgba(2,22,127,0.55)_0%,transparent_60%)]" />
@@ -55,7 +55,7 @@ export function Hero() {
 
             <motion.h1
               {...rise(0.08)}
-              className="display-1 mt-6 text-white uppercase"
+              className="display-1 mt-6 max-w-3xl text-[clamp(2.6rem,6vw,4.6rem)] text-white uppercase"
             >
               We build{" "}
               <span className="text-gold underline decoration-gold/30 decoration-[6px] underline-offset-[0.1em]">
