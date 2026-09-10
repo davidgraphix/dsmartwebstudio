@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container, Section } from "@/components/ui/Section";
 import { Icon } from "@/components/ui/Icon";
@@ -8,10 +7,10 @@ import { Tag } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
 import { QuoteButton } from "@/components/ui/QuoteButton";
 import { Reveal } from "@/components/ui/Reveal";
-import { ProjectVisual } from "@/components/projects/ProjectVisual";
+import { CaseStudyPreview } from "@/components/projects/CaseStudyPreview";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, creativeWorkSchema, jsonLd } from "@/lib/seo";
-import { PROJECTS, getProject } from "@/data/projects";
+import { ORDERED_PROJECTS, getProject, projectNumber } from "@/data/projects";
 import { SITE } from "@/data/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -20,7 +19,9 @@ type PageProps = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return PROJECTS.map((project) => ({ slug: project.slug }));
+  return ORDERED_PROJECTS.filter((project) => project.caseStudy).map((project) => ({
+    slug: project.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!project) return { title: "Project not found" };
 
   return {
-    title: `${project.name} — ${project.category} Case Study`,
+    title: `${project.name} — ${project.title} Case Study`,
     description: project.summary,
     alternates: { canonical: `/work/${project.slug}` },
     openGraph: {
@@ -47,12 +48,16 @@ export default async function ProjectPage({ params }: PageProps) {
   if (!project) notFound();
 
   const sections = [
+    { title: "Overview", body: project.description },
     { title: "The challenge", body: project.challenge },
     { title: "Our solution", body: project.solution },
-    { title: "Design approach", body: project.designNotes },
+    { title: "Design direction", body: project.designNotes },
+    { title: "Responsive experience", body: project.responsiveNotes },
   ].filter((section): section is { title: string; body: string } => Boolean(section.body));
 
-  const others = PROJECTS.filter((item) => item.slug !== project.slug).slice(0, 2);
+  const others = ORDERED_PROJECTS.filter(
+    (item) => item.slug !== project.slug && item.caseStudy,
+  ).slice(0, 2);
 
   return (
     <>
@@ -94,18 +99,21 @@ export default async function ProjectPage({ params }: PageProps) {
           </nav>
 
           <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-[13px] text-white/35">{projectNumber(project)}</span>
             <span className="rounded-full bg-gold px-3 py-1.5 text-[10.5px] font-bold tracking-[0.12em] text-ink uppercase">
-              {project.category}
+              {project.discipline}
             </span>
             {project.industry ? (
               <span className="text-[13px] text-white/55">{project.industry}</span>
             ) : null}
-            {project.year ? <span className="text-[13px] text-white/40">{project.year}</span> : null}
           </div>
 
-          <h1 className="display-2 mt-6 text-white">{project.name}</h1>
+          <h1 className="display-2 mt-6 text-white uppercase">{project.name}</h1>
+          <p className="mt-3 font-display text-lg font-semibold text-gold sm:text-xl">
+            {project.title}
+          </p>
           <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-lg">
-            {project.description || project.summary}
+            {project.summary}
           </p>
 
           {project.liveUrl ? (
@@ -121,16 +129,7 @@ export default async function ProjectPage({ params }: PageProps) {
       {/* Preview */}
       <Section tone="light" spacing="sm">
         <Container>
-          <Reveal>
-            <div className="group overflow-hidden rounded-2xl border border-line">
-              <ProjectVisual
-                project={project}
-                priority
-                sizes="(min-width: 1280px) 1100px, 100vw"
-                className="aspect-16/9 w-full"
-              />
-            </div>
-          </Reveal>
+          <CaseStudyPreview project={project} />
         </Container>
       </Section>
 
@@ -153,7 +152,7 @@ export default async function ProjectPage({ params }: PageProps) {
               {project.features.length > 0 ? (
                 <Reveal>
                   <h2 className="font-display text-[13px] font-bold tracking-[0.16em] text-navy uppercase">
-                    Features
+                    Key features
                   </h2>
                   <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                     {project.features.map((feature) => (
@@ -189,31 +188,6 @@ export default async function ProjectPage({ params }: PageProps) {
                 </Reveal>
               ) : null}
 
-              {project.images && project.images.length > 1 ? (
-                <Reveal>
-                  <h2 className="font-display text-[13px] font-bold tracking-[0.16em] text-navy uppercase">
-                    Screenshots
-                  </h2>
-                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                    {project.images.slice(1).map((image) => (
-                      <div
-                        key={image.src}
-                        className="overflow-hidden rounded-xl border border-line bg-mist"
-                      >
-                        <Image
-                          src={image.src}
-                          alt={image.alt}
-                          width={image.width}
-                          height={image.height}
-                          sizes="(min-width: 640px) 45vw, 100vw"
-                          loading="lazy"
-                          className="h-auto w-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Reveal>
-              ) : null}
             </div>
 
             {/* Meta rail */}
@@ -246,7 +220,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     <dt className="text-[11px] font-bold tracking-[0.14em] text-ink/40 uppercase">
                       Category
                     </dt>
-                    <dd className="mt-1.5 text-[14.5px] text-ink/70">{project.category}</dd>
+                    <dd className="mt-1.5 text-[14.5px] text-ink/70">{project.discipline}</dd>
                   </div>
                   {project.technologies.length > 0 ? (
                     <div>
@@ -301,7 +275,7 @@ export default async function ProjectPage({ params }: PageProps) {
                 >
                   <span>
                     <span className="block text-[11px] font-bold tracking-[0.12em] text-navy uppercase">
-                      {item.category}
+                      {item.discipline}
                     </span>
                     <span className="mt-2 block font-display text-xl font-extrabold text-ink">
                       {item.name}

@@ -1,0 +1,198 @@
+/**
+ * Re-encodes the portfolio screen recordings for the web and refreshes their
+ * poster frames.
+ *
+ * The recordings as captured are 17–34 MB each, which is far more than a
+ * marketing page should ship. Re-encoding at 1280px wide with no audio track
+ * typically brings a desktop recording under 3 MB with no visible loss at the
+ * size it is presented — it sits inside a browser frame roughly 700px wide.
+ *
+ * Requires ffmpeg on PATH. Install it first:
+ *   Windows   winget install Gyan.FFmpeg
+ *   macOS     brew install ffmpeg
+ *   Linux     apt install ffmpeg
+ *
+ * Usage:
+ *   node scripts/optimize-project-media.mjs           # report only
+ *   node scripts/optimize-project-media.mjs --write   # re-encode in place
+ *
+ * Originals move to /media-originals/<project>/<name>.original.mp4, so nothing
+ * is lost and nothing oversized is left inside /public to be deployed.
+ */
+
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  readdirSync,
+  readFileSync,
+  statSync,
+  renameSync,
+  existsSync,
+  mkdirSync,
+} from "node:fs";
+import path from "node:path";
+
+const ROOT = path.join(process.cwd(), "public", "projects");
+/** Pre-optimization copies live outside public/ so they are never deployed. */
+const ARCHIVE = path.join(process.cwd(), "media-originals");
+const WRITE = process.argv.includes("--write");
+
+/** Desktop recordings are presented ~700px wide; 1280 leaves room for retina. */
+const TARGET_WIDTH = 1280;
+/** Constant Rate Factor. 26–30 is the useful range for screen recordings. */
+const CRF = 28;
+
+function ffmpegAvailable() {
+  const probe = spawnSync("ffmpeg", ["-version"], { encoding: "utf8" });
+  return probe.status === 0;
+}
+
+function mb(bytes) {
+  return (bytes / 1048576).toFixed(1) + " MB";
+}
+
+/**
+ * The list comes from `data/projects.ts` rather than from a directory walk, so
+ * the script can only ever touch media a project actually references. Media
+ * left behind by a removed project is reported separately and never rewritten.
+ */
+function videos() {
+  const source = readFileSync(path.join(process.cwd(), "src", "data", "projects.ts"), "utf8");
+  const referenced = [...source.matchAll(/src: "(\/projects\/[^"]+\.mp4)"/g)].map((m) => m[1]);
+
+  return referenced.map((webPath) => {
+    const full = path.join(process.cwd(), "public", webPath);
+    if (!existsSync(full)) throw new Error(`projects.ts references a missing file: ${webPath}`);
+    return { dir: path.basename(path.dirname(full)), file: path.basename(full), full };
+  });
+}
+
+/** .mp4 files under /public/projects that no project references any more. */
+function orphans() {
+  const used = new Set(videos().map((item) => item.full));
+  const found = [];
+  for (const dir of readdirSync(ROOT)) {
+    const dirPath = path.join(ROOT, dir);
+    if (!statSync(dirPath).isDirectory()) continue;
+    for (const file of readdirSync(dirPath)) {
+      if (!file.endsWith(".mp4") || file.endsWith(".original.mp4")) continue;
+      const full = path.join(dirPath, file);
+      if (!used.has(full)) found.push({ dir, file, full });
+    }
+  }
+  return found;
+}
+
+function encode({ dir, full, file }) {
+  const original = path.join(ARCHIVE, dir, file.replace(/\.mp4$/, ".original.mp4"));
+  if (existsSync(original)) {
+    console.log(`  skipped ${file} — already optimized`);
+    return null;
+  }
+
+  const before = statSync(full).size;
+  mkdirSync(path.dirname(original), { recursive: true });
+  renameSync(full, original);
+
+  execFileSync(
+    "ffmpeg",
+    [
+      "-y",
+      "-i", original,
+      // Never upscale a mobile recording that is already narrow.
+      "-vf", `scale='min(${TARGET_WIDTH},iw)':-2:flags=lanczos`,
+      "-c:v", "libx264",
+      "-profile:v", "high",
+      "-crf", String(CRF),
+      "-preset", "slow",
+      // Screen recordings have long static stretches; a wider keyframe
+      // interval saves a lot without hurting seeking on a looping preview.
+      "-g", "150",
+      "-pix_fmt", "yuv420p",
+      // These previews are always muted, so the audio track is dead weight.
+      "-an",
+      "-movflags", "+faststart",
+      full,
+    ],
+    { stdio: "pipe" },
+  );
+
+  const after = statSync(full).size;
+  return { before, after };
+}
+
+/** Grabs a poster frame next to the recording, named desktop.webp / mobile.webp. */
+function poster({ full }) {
+  const isMobile = /mobile|mbile/i.test(path.basename(full));
+  const out = path.join(path.dirname(full), isMobile ? "mobile.webp" : "desktop.webp");
+
+  execFileSync(
+    "ffmpeg",
+    [
+      "-y",
+      "-ss", "1.2",
+      "-i", full,
+      "-frames:v", "1",
+      "-vf", `scale='min(${TARGET_WIDTH},iw)':-2`,
+      "-quality", "72",
+      out,
+    ],
+    { stdio: "pipe" },
+  );
+  return out;
+}
+
+function main() {
+  const list = videos();
+
+  if (!WRITE) {
+    let total = 0;
+    console.log(`Referenced recordings (${list.length}):\n`);
+    for (const item of list) {
+      const size = statSync(item.full).size;
+      total += size;
+      console.log(`  ${item.dir}/${item.file}`.padEnd(56) + mb(size));
+    }
+    console.log(`\n  total`.padEnd(58) + mb(total));
+
+    const unused = orphans();
+    if (unused.length) {
+      let dead = 0;
+      console.log("\nUnreferenced media still in /public (shipped but never shown):\n");
+      for (const item of unused) {
+        const size = statSync(item.full).size;
+        dead += size;
+        console.log(`  ${item.dir}/${item.file}`.padEnd(56) + mb(size));
+      }
+      console.log(`\n  total`.padEnd(58) + mb(dead));
+    }
+
+    console.log("\nRun with --write to re-encode (requires ffmpeg).");
+    return;
+  }
+
+  if (!ffmpegAvailable()) {
+    console.error("ffmpeg not found on PATH. See the header of this file for install instructions.");
+    process.exitCode = 1;
+    return;
+  }
+
+  let before = 0;
+  let after = 0;
+  for (const item of list) {
+    console.log(`Encoding ${item.dir}/${item.file} ...`);
+    const result = encode(item);
+    if (result) {
+      before += result.before;
+      after += result.after;
+      console.log(`  ${mb(result.before)} -> ${mb(result.after)}`);
+    }
+    console.log(`  poster ${path.basename(poster(item))}`);
+  }
+
+  if (before) {
+    console.log(`\nTotal ${mb(before)} -> ${mb(after)}`);
+    console.log("Originals moved to /media-originals — delete that folder once you are happy.");
+  }
+}
+
+main();

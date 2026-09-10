@@ -20,25 +20,23 @@ export function Skeleton({
   );
 }
 
-export function ProjectCardSkeleton({ tone = "light" }: { tone?: "light" | "dark" }) {
+/** Mirrors the editorial project block: copy column beside a device frame. */
+export function ProjectShowcaseSkeleton({ tone = "light" }: { tone?: "light" | "dark" }) {
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-2xl border",
-        tone === "dark" ? "border-white/10 bg-white/[0.03]" : "border-line bg-white",
-      )}
-    >
-      <Skeleton tone={tone} className="aspect-16/10 w-full rounded-none" />
-      <div className="space-y-3 p-6">
-        <Skeleton tone={tone} className="h-3 w-24 rounded-full" />
-        <Skeleton tone={tone} className="h-6 w-3/5" />
+    <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+      <div className="space-y-4 lg:col-span-5">
+        <Skeleton tone={tone} className="h-3 w-40 rounded-full" />
+        <Skeleton tone={tone} className="h-10 w-3/5" />
         <Skeleton tone={tone} className="h-4 w-full" />
         <Skeleton tone={tone} className="h-4 w-4/5" />
         <div className="flex gap-2 pt-2">
-          <Skeleton tone={tone} className="h-7 w-20 rounded-full" />
-          <Skeleton tone={tone} className="h-7 w-16 rounded-full" />
-          <Skeleton tone={tone} className="h-7 w-24 rounded-full" />
+          <Skeleton tone={tone} className="h-7 w-20 rounded-md" />
+          <Skeleton tone={tone} className="h-7 w-16 rounded-md" />
+          <Skeleton tone={tone} className="h-7 w-24 rounded-md" />
         </div>
+      </div>
+      <div className="lg:col-span-7">
+        <Skeleton tone={tone} className="aspect-2/1 w-full rounded-2xl" />
       </div>
     </div>
   );

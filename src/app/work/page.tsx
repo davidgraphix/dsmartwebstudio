@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, Section } from "@/components/ui/Section";
-import { ProjectCard } from "@/components/projects/ProjectCard";
+import { ProjectShowcase } from "@/components/projects/ProjectShowcase";
 import { QuoteButton } from "@/components/ui/QuoteButton";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { Reveal } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, jsonLd } from "@/lib/seo";
-import { PROJECTS } from "@/data/projects";
+import { ORDERED_PROJECTS } from "@/data/projects";
 import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Our Work — Web, App & Software Projects",
   description:
-    "Selected projects by DSmart Web Studio: business websites, e-commerce stores, web applications, admin dashboards and custom software.",
+    "Selected projects by DSmart Web Studio: e-commerce platforms, business websites, research products, corporate sites and custom applications, shown as live screen recordings.",
   alternates: { canonical: "/work" },
 };
 
@@ -51,61 +51,44 @@ export default function WorkPage() {
             Selected <span className="text-gold">work</span>
           </h1>
           <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/65 sm:text-lg">
-            Products we designed, built and optimized — from business websites to full management
-            systems.
+            Products we designed, built and optimized. Every preview below is a screen recording of
+            the live site, not a mockup.
           </p>
         </Container>
       </Section>
 
-      <Section tone="light">
+      <Section tone="light" spacing="lg">
         <Container>
-          {PROJECTS.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2">
-              {PROJECTS.map((project, index) => (
-                <ProjectCard key={project.slug} project={project} priority={index < 2} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-line bg-mist p-10 text-center sm:p-16">
-              <h2 className="font-display text-2xl font-extrabold text-ink">
-                Case studies are being published.
-              </h2>
-              <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-ink/55">
-                We publish a project only once we can show the real product and describe it
-                accurately. Message us and we’ll walk you through live builds directly.
-              </p>
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <WhatsAppButton
-                  source="work-page-empty"
-                  size="lg"
-                  message="Hello DSmart Web Studio, I'd like to see examples of your work."
-                >
-                  See our work on WhatsApp
-                </WhatsAppButton>
-                <QuoteButton source="work-page-empty" variant="outline" size="lg" arrow>
-                  Start a Project
-                </QuoteButton>
-              </div>
-            </div>
-          )}
+          <div className="space-y-20 sm:space-y-28 lg:space-y-36">
+            {ORDERED_PROJECTS.map((project, index) => (
+              <ProjectShowcase key={project.slug} project={project} index={index} />
+            ))}
+          </div>
 
-          <Reveal className="mt-14">
-            <div className="flex flex-col items-start gap-5 rounded-2xl bg-navy p-7 text-white sm:flex-row sm:items-center sm:justify-between sm:p-9">
-              <div>
-                <p className="font-display text-xl font-bold">Have a project like this?</p>
-                <p className="mt-1.5 text-[14px] text-white/60">
-                  Tell us what you need and we’ll scope it properly.
+          <Reveal className="mt-24 sm:mt-32">
+            <div className="flex flex-col items-start gap-6 rounded-2xl bg-navy p-8 text-white sm:p-10 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-lg">
+                <p className="font-display text-xl font-extrabold uppercase sm:text-2xl">
+                  Your project could be <span className="text-gold">next.</span>
+                </p>
+                <p className="mt-2.5 text-[14.5px] leading-relaxed text-white/60">
+                  Have an idea, business or digital product that needs to be built properly? Tell us
+                  the goal and we’ll scope it.
                 </p>
               </div>
-              <QuoteButton
-                source="work-page-cta"
-                variant="gold"
-                size="lg"
-                arrow
-                className="w-full shrink-0 sm:w-auto"
-              >
-                Start Your Project
-              </QuoteButton>
+              <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+                <QuoteButton source="work-page-cta" variant="gold" size="lg" arrow>
+                  Start a Project
+                </QuoteButton>
+                <WhatsAppButton
+                  source="work-page-cta"
+                  variant="outline-light"
+                  size="lg"
+                  message="Hello DSmart Web Studio, I'd like a quote for a project."
+                >
+                  Request a Quote
+                </WhatsAppButton>
+              </div>
             </div>
           </Reveal>
         </Container>

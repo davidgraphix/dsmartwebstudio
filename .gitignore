@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Pre-optimization recordings kept by scripts/optimize-project-media.mjs.
+# Held outside public/ so they are never served or deployed.
+/media-originals/
