@@ -54,6 +54,12 @@ export const metadata: Metadata = {
   creator: SITE.name,
   publisher: SITE.name,
   alternates: { canonical: "/" },
+  // The navy-background lockup is the right asset for icon slots that must be
+  // opaque and square — iOS composites a touch icon onto black otherwise.
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/logo-jpeg.PNG", sizes: "1254x1254", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: SITE.locale,

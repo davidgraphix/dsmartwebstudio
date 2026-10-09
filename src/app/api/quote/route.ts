@@ -3,6 +3,7 @@ import { FIELD_MESSAGES, quoteSchema, sanitize } from "@/lib/validation";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import {
   isMailConfigured,
+  missingMailVars,
   quoteEmailHtml,
   quoteEmailSubject,
   quoteEmailText,
@@ -117,7 +118,10 @@ export async function POST(request: Request): Promise<NextResponse<QuoteResponse
 
   if (!mailResult.sent) {
     if (mailResult.reason === "not-configured") {
-      console.error("[quote] SMTP is not configured — inquiry could not be emailed.");
+      console.error(
+        "[quote] SMTP is not configured — inquiry could not be emailed. Missing:",
+        missingMailVars().join(", ") || "(none reported)",
+      );
     } else {
       console.error("[quote] Mail delivery failed:", mailResult.error);
     }

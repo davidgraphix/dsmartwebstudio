@@ -21,11 +21,23 @@ export type MailConfig = {
 
 let cached: Transporter | null = null;
 
+const REQUIRED_VARS = ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"] as const;
+
+/** Names the variables that still need setting, for a clear server-side error. */
+export function missingMailVars(): string[] {
+  return REQUIRED_VARS.filter((name) => !process.env[name]?.trim());
+}
+
 export function readMailConfig(): MailConfig | null {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const password = process.env.SMTP_PASSWORD;
-  if (!host || !user || !password) return null;
+  if (missingMailVars().length > 0) return null;
+
+  const host = process.env.SMTP_HOST!.trim();
+  const user = process.env.SMTP_USER!.trim();
+
+  // Google shows an app password as four groups of four characters. Pasted
+  // straight from that screen it carries spaces, which Gmail then rejects at
+  // AUTH — so strip all whitespace rather than fail on a copy-paste artefact.
+  const password = process.env.SMTP_PASSWORD!.replace(/\s+/g, "");
 
   const port = Number(process.env.SMTP_PORT || 587);
 
@@ -35,9 +47,29 @@ export function readMailConfig(): MailConfig | null {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
     user,
     password,
-    from: process.env.MAIL_FROM || `DSmart Web Studio <${user}>`,
-    to: process.env.MAIL_TO || "dsmartwebstudio@gmail.com",
+    from: resolveFrom(user),
+    to: (process.env.MAIL_TO || "dsmartwebstudio@gmail.com").trim(),
   };
+}
+
+/**
+ * Gmail only accepts a From address that matches the authenticated account or
+ * one of its verified aliases. Anything else is rejected outright or silently
+ * rewritten, so a mismatched MAIL_FROM is ignored in favour of the account
+ * that actually holds the app password.
+ */
+function resolveFrom(user: string): string {
+  const configured = process.env.MAIL_FROM?.trim();
+  if (!configured) return `DSmart Web Studio <${user}>`;
+
+  const address = configured.match(/<([^>]+)>/)?.[1] ?? configured;
+  if (address.trim().toLowerCase() === user.toLowerCase()) return configured;
+
+  console.warn(
+    `[mail] MAIL_FROM (${address}) does not match SMTP_USER, which Gmail will reject. ` +
+      `Sending as the authenticated account instead.`,
+  );
+  return `DSmart Web Studio <${user}>`;
 }
 
 export function isMailConfigured(): boolean {
