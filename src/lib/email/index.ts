@@ -1,4 +1,4 @@
-export { sendMail, isMailConfigured } from "./mailer";
+export { sendMail, isMailConfigured, missingMailVars } from "./mailer";
 export {
   quoteEmailHtml,
   quoteEmailText,

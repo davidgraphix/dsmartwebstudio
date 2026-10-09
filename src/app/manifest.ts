@@ -12,6 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#02167F",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
+      // Opaque square lockup, for launcher slots that cannot use transparency.
+      { src: "/logo-jpeg.PNG", sizes: "1254x1254", type: "image/png", purpose: "any" },
     ],
   };
 }

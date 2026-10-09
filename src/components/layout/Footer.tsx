@@ -16,7 +16,7 @@ export function Footer() {
       <Container>
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)] lg:gap-16">
           <div>
-            <Logo tone="light" />
+            <Logo tone="light" size="lg" />
             <p className="mt-5 max-w-xs text-[14.5px] leading-relaxed text-white/55">
               {SITE.tagline}
             </p>

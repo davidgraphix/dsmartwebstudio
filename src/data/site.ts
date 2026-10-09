@@ -10,7 +10,12 @@ export const SITE = {
   tagline: "Digital products designed to help businesses grow.",
   description:
     "DSmart Web Studio designs and builds websites, web applications, mobile apps, admin dashboards and custom software engineered for performance, search visibility and sales.",
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://dsmartwebstudio.com").replace(/\/$/, ""),
+  // The custom domain does not resolve yet, so the live Vercel URL is the
+  // production origin for canonical links, the sitemap and Open Graph tags.
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://dsmartwebstudio.vercel.app").replace(
+    /\/$/,
+    "",
+  ),
   locale: "en_NG",
   email: "dsmartwebstudio@gmail.com",
   founded: "2023",

@@ -69,7 +69,7 @@ export function Navbar() {
         )}
       >
         <nav className="container-x flex h-16 items-center justify-between gap-4 sm:h-20" aria-label="Primary">
-          <Logo tone={scrolled ? "dark" : "light"} />
+          <Logo tone={scrolled ? "dark" : "light"} priority />
 
           <ul className="hidden items-center gap-1 lg:flex">
             {NAV_ITEMS.map((item) => {
